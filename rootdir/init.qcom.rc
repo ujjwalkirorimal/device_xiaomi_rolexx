@@ -149,6 +149,9 @@ on boot
 on post-fs-data
     mkdir /data/vendor/misc 01771 system system
 
+    # Legacy ril-daemon is now disabled by default
+    enable ril-daemon
+
     # Start RIL daemon
     start ril-daemon
 
