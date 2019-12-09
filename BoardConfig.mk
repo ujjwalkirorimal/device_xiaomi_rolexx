@@ -208,6 +208,7 @@ TARGET_DISABLE_WCNSS_CONFIG_COPY := true
 WIFI_DRIVER_FW_PATH_AP := "ap"
 WIFI_DRIVER_FW_PATH_STA := "sta"
 WPA_SUPPLICANT_VERSION := VER_0_8_X
+DISABLE_EAP_PROXY := true
 
 # Inherit the common proprietary files
 -include vendor/xiaomi/rolex/BoardConfigVendor.mk
