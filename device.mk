@@ -183,7 +183,8 @@ PRODUCT_PACKAGES += \
 
 # Healthd
 PRODUCT_PACKAGES += \
-    chargeonlymode
+    chargeonlymode \
+    charger_res_images
 
 # HIDL
 PRODUCT_PACKAGES += \
