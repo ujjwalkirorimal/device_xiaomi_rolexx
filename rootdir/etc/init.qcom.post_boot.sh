@@ -463,8 +463,8 @@ else
                 disable_core_ctl
                 echo 1 > /sys/module/lowmemorykiller/parameters/enable_lmk
             fi
-        echo "15360,19200,23040,26880,34415,43737" > /sys/module/lowmemorykiller/parameters/minfree
-        echo 53059 > /sys/module/lowmemorykiller/parameters/vmpressure_file_min
+        echo "18432,23040,27648,32256,55296,80640" > /sys/module/lowmemorykiller/parameters/minfree
+        echo 80640 > /sys/module/lowmemorykiller/parameters/vmpressure_file_min
         fi
 
         # Enable adaptive LMK for all targets &
@@ -494,10 +494,10 @@ else
             #Set PPR parameters for all other targets.
             echo $set_almk_ppr_adj > /sys/module/process_reclaim/parameters/min_score_adj
             echo 1 > /sys/module/process_reclaim/parameters/enable_process_reclaim
-            echo 50 > /sys/module/process_reclaim/parameters/pressure_min
+            echo 10 > /sys/module/process_reclaim/parameters/pressure_min
             echo 70 > /sys/module/process_reclaim/parameters/pressure_max
             echo 30 > /sys/module/process_reclaim/parameters/swap_opt_eff
-            echo 512 > /sys/module/process_reclaim/parameters/per_swap_size
+            echo 1024 > /sys/module/process_reclaim/parameters/per_swap_size
             ;;
         esac
     fi
