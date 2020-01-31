@@ -152,9 +152,6 @@ on post-fs-data
     # Legacy ril-daemon is now disabled by default
     enable ril-daemon
 
-    # Start RIL daemon
-    start ril-daemon
-
     # Create directory used by display clients
     mkdir /data/vendor/display 0770 system graphics
 
