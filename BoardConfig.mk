@@ -184,6 +184,7 @@ TARGET_USES_INTERACTION_BOOST := true
 
 # Qualcomm support
 BOARD_USES_QCOM_HARDWARE := true
+BOARD_USES_ADRENO := true
 
 # Recovery
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/fstab.qcom
@@ -198,7 +199,8 @@ VENDOR_SECURITY_PATCH := 2019-06-05
 
 # SELinux
 include device/qcom/sepolicy/sepolicy.mk
-BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+include vendor/omni/sepolicy/sepolicy.mk
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy-t
 
 # We modify several neverallows, so let the build proceed
 ifneq ($(TARGET_BUILD_VARIANT),user)
