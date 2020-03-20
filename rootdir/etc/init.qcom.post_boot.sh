@@ -335,24 +335,22 @@ function configure_read_ahead_kb_values() {
     MemTotalStr=`cat /proc/meminfo | grep MemTotal`
     MemTotal=${MemTotalStr:16:8}
 
+    dmpts=$(ls /sys/block/*/queue/read_ahead_kb | grep -e dm -e mmc)
+
     # Set 128 for <= 3GB &
     # set 512 for >= 4GB targets.
     if [ $MemTotal -le 3145728 ]; then
         echo 128 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 128 > /sys/block/mmcblk0/queue/read_ahead_kb
         echo 128 > /sys/block/mmcblk0rpmb/bdi/read_ahead_kb
-        echo 128 > /sys/block/mmcblk0rpmb/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-0/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-1/queue/read_ahead_kb
-        echo 128 > /sys/block/dm-2/queue/read_ahead_kb
+        for dm in $dmpts; do
+            echo 128 > $dm
+        done
     else
         echo 512 > /sys/block/mmcblk0/bdi/read_ahead_kb
-        echo 512 > /sys/block/mmcblk0/queue/read_ahead_kb
         echo 512 > /sys/block/mmcblk0rpmb/bdi/read_ahead_kb
-        echo 512 > /sys/block/mmcblk0rpmb/queue/read_ahead_kb
-        echo 512 > /sys/block/dm-0/queue/read_ahead_kb
-        echo 512 > /sys/block/dm-1/queue/read_ahead_kb
-        echo 512 > /sys/block/dm-2/queue/read_ahead_kb
+        for dm in $dmpts; do
+            echo 512 > $dm
+        done
     fi
 }
 
@@ -410,7 +408,6 @@ ProductName=`getprop ro.product.name`
 low_ram=`getprop ro.config.low_ram`
 
 if [ "$ProductName" == "msmnile" ] || [ "$ProductName" == "kona" ] ; then
-      # Enable ZRAM
       configure_read_ahead_kb_values
 else
     arch_type=`uname -m`
@@ -502,13 +499,10 @@ else
         esac
     fi
 
-    # Set allocstall_threshold to 0 for all targets.
-    echo 80 > /proc/sys/vm/swappiness
-    echo 0 > /sys/module/vmpressure/parameters/allocstall_threshold
-
-    # Disable wsf for all targets beacause we are using efk.
-    # wsf Range : 1..1000 So set to bare minimum value 1.
-    echo 1 > /proc/sys/vm/watermark_scale_factor
+    # Don't account allocstalls for <= 2GB RAM targets
+    if [ $MemTotal -le 2097152 ]; then
+        echo 100 > /sys/module/vmpressure/parameters/allocstall_threshold
+    fi
 
     configure_read_ahead_kb_values
 
@@ -1295,13 +1289,6 @@ case "$target" in
                 echo 50000 > /proc/sys/kernel/sched_freq_inc_notify
                 echo 50000 > /proc/sys/kernel/sched_freq_dec_notify
 
-                # Enable core control
-#                insmod /system/lib/modules/core_ctl.ko
-                echo 2 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
-                echo 4 > /sys/devices/system/cpu/cpu0/core_ctl/max_cpus
-                echo 68 > /sys/devices/system/cpu/cpu0/core_ctl/busy_up_thres
-                echo 40 > /sys/devices/system/cpu/cpu0/core_ctl/busy_down_thres
-                echo 100 > /sys/devices/system/cpu/cpu0/core_ctl/offline_delay_ms
                 case "$revision" in
                      "3.0")
                      # Enable dynamic clock gatin
@@ -2234,14 +2221,6 @@ case "$target" in
                 # HMP scheduler (big.Little cluster related) settings
                 echo 93 > /proc/sys/kernel/sched_upmigrate
                 echo 83 > /proc/sys/kernel/sched_downmigrate
-
-                # Enable core control
-                echo 2 > /sys/devices/system/cpu/cpu0/core_ctl/min_cpus
-                echo 4 > /sys/devices/system/cpu/cpu0/core_ctl/max_cpus
-                echo 68 > /sys/devices/system/cpu/cpu0/core_ctl/busy_up_thres
-                echo 40 > /sys/devices/system/cpu/cpu0/core_ctl/busy_down_thres
-                echo 100 > /sys/devices/system/cpu/cpu0/core_ctl/offline_delay_ms
-                echo 1 > /sys/devices/system/cpu/cpu0/core_ctl/is_big_cluster
 
                 # re-enable thermal core_control
                 echo 1 > /sys/module/msm_thermal/core_control/enabled
@@ -5206,3 +5185,4 @@ esac
 misc_link=$(ls -l /dev/block/bootdevice/by-name/misc)
 real_path=${misc_link##*>}
 setprop persist.vendor.mmi.misc_dev_path $real_path
+
